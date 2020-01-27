@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -pedantic -Wall -m64
 NFLAGS = -f elf64
-ALLEGRO = allegro-5 allegro_image-5 allegro_font-5 allegro_ttf-5
+ALLEGRO = allegro-5 allegro_image-5 allegro_font-5 allegro_ttf-5 allegro_primitives-5
 TARGET = bezier
 
 all: main.o draw_bezier.o

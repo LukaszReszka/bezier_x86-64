@@ -2,6 +2,7 @@
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
+#include <allegro5/allegro_primitives.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -14,7 +15,7 @@ int main(int argc, char * argv[])
 	const int WIDTH = atoi(argv[1]);
 	const int HEIGHT = atoi(argv[2]);
 
-	if(!HEIGHT || !WIDTH || !al_init() || !al_install_keyboard() || !al_install_mouse() || !al_init_image_addon() || !al_init_font_addon() || !al_init_ttf_addon())
+	if(!HEIGHT || !WIDTH || !al_init() || !al_install_keyboard() || !al_install_mouse() || !al_init_image_addon() || !al_init_font_addon() || !al_init_ttf_addon() || !al_init_primitives_addon())
     		return EXIT_FAILURE;
 	
 	ALLEGRO_FONT *font = al_load_font("arial.ttf", 18, 0);
@@ -32,7 +33,7 @@ int main(int argc, char * argv[])
 	al_register_event_source(event_queue, al_get_display_event_source(display));
 	al_register_event_source(event_queue, al_get_mouse_event_source());
 
-	bool wantQuit = false;
+	bool wantQuit = false, printResult = false, shouldWait = false;
 	int n_given_points = 0;
 	int points_x[5];
 	int points_y[5];
@@ -49,7 +50,15 @@ int main(int argc, char * argv[])
       			al_wait_for_event(event_queue, &ev);
 			if(ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
 			{
-				++n_given_points;
+				points_x[n_given_points] = ev.mouse.x;
+				points_y[n_given_points] = ev.mouse.y;
+				al_draw_filled_circle(ev.mouse.x, ev.mouse.y, 10, al_map_rgb(255, 0, 255));
+				if (++n_given_points == 5)
+				{
+					al_save_bitmap("display.bmp", al_get_backbuffer(display));
+					printResult = true;
+				}
+				al_flip_display();
 			}
 			else if (ev.type == ALLEGRO_EVENT_KEY_DOWN)
 			{
@@ -63,31 +72,39 @@ int main(int argc, char * argv[])
 		}
 		if (!wantQuit)
 		{
-			al_save_bitmap("display.bmp", al_get_backbuffer(display)); 
-			char buf[100000];	
-			FILE *bitmap = fopen("display.bmp", "rb");
-			if (feof(bitmap) || ferror(bitmap))
-				return EXIT_FAILURE;
-			fgets(buf, 100000, bitmap);
-			fclose(bitmap);
-			//draw_bezier.s
-			ALLEGRO_BITMAP *bmp = al_load_bitmap ("display.bmp");
-			if (!bmp)
-				return EXIT_FAILURE;
-			al_draw_bitmap(bmp, 0, 0, 0);
-			al_destroy_bitmap (bmp);
-			al_flip_display();
-			ALLEGRO_EVENT ev;
-      			al_wait_for_event(event_queue, &ev);
-			if (ev.type == ALLEGRO_EVENT_KEY_DOWN)
+			if (printResult)
 			{
-				n_given_points = 0;
-				al_clear_to_color(al_map_rgb(255, 255, 255));
-				al_draw_text(font, al_map_rgb(0, 0, 0), 0, HEIGHT-20, 0, "Press any key for reset. Choose points using mouse.");
-				al_flip_display();				
+				char buf[100000];	
+				FILE *bitmap = fopen("display.bmp", "rb");
+				if (feof(bitmap) || ferror(bitmap))
+					return EXIT_FAILURE;
+				fgets(buf, 100000, bitmap);
+				fclose(bitmap);
+				//draw_bezier.s
+				ALLEGRO_BITMAP *bmp = al_load_bitmap ("display.bmp");
+				if (!bmp)
+					return EXIT_FAILURE;
+				al_draw_bitmap(bmp, 0, 0, 0);
+				al_destroy_bitmap (bmp);
+				al_flip_display();
+				printResult = false;
+				shouldWait = true;			
 			}
-			else if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
-				wantQuit = true;
+			if(shouldWait)
+			{
+				ALLEGRO_EVENT ev;
+      				al_wait_for_event(event_queue, &ev);
+				if (ev.type == ALLEGRO_EVENT_KEY_DOWN)
+				{
+					n_given_points = 0;
+					al_clear_to_color(al_map_rgb(255, 255, 255));
+					al_draw_text(font, al_map_rgb(0, 0, 0), 0, HEIGHT-20, 0, "Press any key for reset. Choose points using mouse.");
+					al_flip_display();
+					shouldWait = false;				
+				}
+				else if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+					wantQuit = true;
+			}
 		}
 	}
 	al_destroy_font (font);
