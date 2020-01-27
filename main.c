@@ -54,7 +54,7 @@ int main(int argc, char * argv[])
 	al_register_event_source(event_queue, al_get_display_event_source(display));
 	al_register_event_source(event_queue, al_get_mouse_event_source());
 
-	const size_t BUF_SIZE = (((((WIDTH*3)+((WIDTH*3)%4))*HEIGHT)+54)*8)+1; 	
+	const size_t BUF_SIZE = ((((WIDTH*3)+((WIDTH*3)%4))*HEIGHT)+54)+1; 	
 	bool wantQuit = false, printResult = false, shouldWait = false;
 	int n_given_points = 0;
 	int points_x[5];
@@ -103,18 +103,18 @@ int main(int argc, char * argv[])
 					fprintf(stderr, "Failed to open bitmap.\n");				
 					return EXIT_FAILURE;
 				}
-				fgets(buf, BUF_SIZE, bitmap);
+				fread(buf, 1, BUF_SIZE, bitmap);
 				fclose(bitmap);
 				//draw_bezier.s <- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-				 bitmap = fopen(FILE_NAME, "wb");
+				bitmap = fopen(FILE_NAME, "wb");
 				if (feof(bitmap) || ferror(bitmap))
 				{
 					fprintf(stderr, "Failed to save bitmap.\n");				
 					return EXIT_FAILURE;
 				}
-				fputs(buf, bitmap);
+				fwrite(buf, 1, BUF_SIZE, bitmap);
 				fclose(bitmap);
-				ALLEGRO_BITMAP *bmp = al_load_bitmap (FILE_NAME);
+				ALLEGRO_BITMAP *bmp = al_load_bitmap(FILE_NAME);
 				if (!bmp)
 				{
 					fprintf(stderr, "Failed to load bitmap.\n");				
@@ -145,6 +145,6 @@ int main(int argc, char * argv[])
 	}
 	al_destroy_font (font);
 	al_destroy_display(display);
-	al_destroy_event_queue(event_queue);	//skalowanie czcionki
+	al_destroy_event_queue(event_queue);
 	return 0;
 }
