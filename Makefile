@@ -1,17 +1,17 @@
 CC = gcc
-CFLAGS = -pedantic -Wall -m64
+CFLAGS = -pedantic -Wall -std=c99 -m64
 NFLAGS = -f elf64
 ALLEGRO = allegro-5 allegro_image-5 allegro_font-5 allegro_ttf-5 allegro_primitives-5
 TARGET = bezier
 
-all: main.o draw_bezier.o
-	$(CC) main.o draw_bezier.o -o $(TARGET) $$(pkg-config --cflags --libs $(ALLEGRO))
+all: main.o draw_bezier_curve.o
+	$(CC) main.o draw_bezier_curve.o -o $(TARGET) $$(pkg-config --cflags --libs $(ALLEGRO))
 
 main.o: main.c
 	$(CC) -c main.c
 
-draw_bezier.o: draw_bezier.s
-	nasm $(NFLAGS) -o draw_bezier.o draw_bezier.s
+draw_bezier_curve.o: draw_bezier_curve.s
+	nasm $(NFLAGS) -o draw_bezier_curve.o draw_bezier_curve.s
 
 .PHONY: clean
 clean:
