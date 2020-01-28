@@ -4,7 +4,7 @@ const_0:    dw 0.0
 const_1:    dw 1.0
 const_4:    dw 4.0
 const_6:    dw 6.0
-iter_less:  dw 0.0001	
+iter_less:  dw 0.5	
 	
 	section .text
 	global draw_bezier_curve
@@ -140,17 +140,17 @@ loop_draw_pixel:
 	imul	rax, rcx
 	imul    rax, r9
 	lea	rax, [rax + rdi]
-	;mov	[rax],	byte 0
+	;mov	 [rax],	byte 0
 	;mov     [rax+1], byte 0
 	;mov     [rax+2], byte 0
 
-;powtarzam obliczenia dla zmienionej wartości t
+;zamykam
 
 	mov rax, iter_less
 	subss	xmm0, [rax]
 	mov rax, const_0
 	ucomiss xmm0, [rax]
-	jne loop_draw_pixel
+	jge loop_draw_pixel
 
 ;end
 	ret
