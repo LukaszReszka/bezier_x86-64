@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -pedantic -Wall -std=c99 -m64
+CFLAGS = -std=c99 -pedantic -Wall -m64
 NFLAGS = -f elf64
 ALLEGRO = allegro-5 allegro_image-5 allegro_font-5 allegro_ttf-5 allegro_primitives-5
 TARGET = bezier

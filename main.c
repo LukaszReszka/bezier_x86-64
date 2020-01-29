@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <assert.h>
 #include "draw_bezier_curve.h"
 
 int main(int argc, char * argv[])
@@ -28,8 +29,8 @@ int main(int argc, char * argv[])
 	const char MESSAGE[] = "Press any key for reset. Choose points using mouse."; 
 	const char FILE_NAME[] = "display.bmp";
 	const int POINTS_R = 5;
-	unsigned int points_x[5];
-	unsigned int points_y[5];
+	int points_x[5];
+	int points_y[5];
 
 	
 	if(!al_init() || !al_install_keyboard() || !al_install_mouse() || !al_init_image_addon() || !al_init_font_addon() || !al_init_ttf_addon() || !al_init_primitives_addon())
@@ -57,8 +58,8 @@ int main(int argc, char * argv[])
 	al_register_event_source(event_queue, al_get_display_event_source(display));
 	al_register_event_source(event_queue, al_get_mouse_event_source());
 
-	const unsigned int WIDTH_IN_BYTES = (WIDTH*3)+((WIDTH*3)%4);	
-	const unsigned int BUF_SIZE = (WIDTH_IN_BYTES*HEIGHT)+54+1; 	
+	const int SIZE_OF_PIXEL_ROW = (WIDTH*3)+((4-((WIDTH*3)%4))%4);	
+	const int BUF_SIZE = (SIZE_OF_PIXEL_ROW*HEIGHT)+54+1; 	
 	bool wantQuit = false, printResult = false, shouldWait = false;
 	int n_given_points = 0;
 
@@ -74,8 +75,10 @@ int main(int argc, char * argv[])
       			al_wait_for_event(event_queue, &ev);
 			if(ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
 			{
+				assert(ev.mouse.x>=0 && ev.mouse.x<= WIDTH);
+				assert(ev.mouse.y>=0 && ev.mouse.y<= HEIGHT);			
 				points_x[n_given_points] = ev.mouse.x;
-				points_y[n_given_points] = ev.mouse.y;
+				points_y[n_given_points] = HEIGHT-ev.mouse.y;
 				al_draw_filled_circle(ev.mouse.x, ev.mouse.y, POINTS_R, points_color);
 				if (++n_given_points == 5)
 				{
@@ -107,7 +110,7 @@ int main(int argc, char * argv[])
 				}
 				fread(buf, 1, BUF_SIZE, bitmap);
 				fclose(bitmap);
-				draw_bezier_curve(buf, points_x, points_y, WIDTH_IN_BYTES);		//wywołanie funkcji asemblerowej
+				draw_bezier_curve(buf, points_x, points_y, SIZE_OF_PIXEL_ROW);		//wywołanie funkcji asemblerowej
 				bitmap = fopen(FILE_NAME, "wb");
 				if (feof(bitmap) || ferror(bitmap))
 				{
